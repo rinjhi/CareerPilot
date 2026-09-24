@@ -27,6 +27,8 @@ if "profile_experience" not in st.session_state:
     st.session_state.profile_experience = ""
 if "profile_saved" not in st.session_state:
     st.session_state.profile_saved = False
+if "show_profile_form" not in st.session_state:
+    st.session_state.show_profile_form = True
 
 if "interview_started" not in st.session_state:
     st.session_state.interview_started = False
@@ -219,6 +221,14 @@ st.markdown("""
     margin-bottom: 12px;
 }
 
+.profile-form {
+    background: rgba(6,182,212,0.03);
+    border: 1px solid rgba(6,182,212,0.15);
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 16px;
+}
+
 .stButton > button {
     background: linear-gradient(135deg,
         rgba(6,182,212,0.12),
@@ -393,19 +403,19 @@ if st.session_state.profile_saved:
         '<div class="profile-card">'
         '<div class="profile-grid">'
         '<div class="profile-item">'
-        '<div class="profile-label">🎓 Education</div>'
+        '<div class="profile-label">Education</div>'
         '<div class="profile-value">{education}</div>'
         '</div>'
         '<div class="profile-item">'
-        '<div class="profile-label">🎯 Career Goal</div>'
+        '<div class="profile-label">Career Goal</div>'
         '<div class="profile-value">{career_goal}</div>'
         '</div>'
         '<div class="profile-item">'
-        '<div class="profile-label">⚡ Skills</div>'
+        '<div class="profile-label">Skills</div>'
         '<div class="profile-value">{skills}</div>'
         '</div>'
         '<div class="profile-item">'
-        '<div class="profile-label">💼 Experience</div>'
+        '<div class="profile-label">Experience</div>'
         '<div class="profile-value">{experience}</div>'
         '</div>'
         '</div>'
@@ -418,6 +428,13 @@ if st.session_state.profile_saved:
     )
     st.markdown(profile_html, unsafe_allow_html=True)
 
+    # Edit profile toggle button
+    col_btn, col_space = st.columns([1, 3])
+    with col_btn:
+        if st.button("Edit Profile", use_container_width=True):
+            st.session_state.show_profile_form = not st.session_state.show_profile_form
+            st.rerun()
+
 else:
     st.markdown("""
     <div class="empty-profile">
@@ -427,33 +444,34 @@ else:
     </div>
     """, unsafe_allow_html=True)
 
-# Edit Profile expander — no emojis in label to avoid rendering issues
-with st.expander(
-    "Edit Profile" if st.session_state.profile_saved else "Set Up Your Profile",
-    expanded=not st.session_state.profile_saved
-):
+# Profile form — shown when profile not saved OR when edit is toggled
+if st.session_state.show_profile_form:
+    st.markdown('<div class="profile-form">', unsafe_allow_html=True)
+
     edu = st.text_input(
-        "🎓 Education",
+        "Education",
         value=st.session_state.profile_education,
         placeholder="e.g. BCA, B.Tech CSE, BSc Computer Science"
     )
     goal = st.text_input(
-        "🎯 Career Goal",
+        "Career Goal",
         value=st.session_state.profile_career_goal,
         placeholder="e.g. Software Developer, Data Analyst, Full Stack Developer"
     )
     skills = st.text_input(
-        "⚡ Skills (comma separated)",
+        "Skills (comma separated)",
         value=st.session_state.profile_skills,
         placeholder="e.g. Python, SQL, HTML, CSS, JavaScript"
     )
     exp = st.text_input(
-        "💼 Experience",
+        "Experience",
         value=st.session_state.profile_experience,
         placeholder="e.g. Fresher, 1 year internship, 2 years industry experience"
     )
 
+    st.markdown('</div>', unsafe_allow_html=True)
     st.markdown('<div class="save-btn">', unsafe_allow_html=True)
+
     if st.button("Save Profile", use_container_width=True):
         if not edu or not goal or not skills or not exp:
             st.warning("Please fill in all fields before saving.")
@@ -463,8 +481,10 @@ with st.expander(
             st.session_state.profile_skills = skills
             st.session_state.profile_experience = exp
             st.session_state.profile_saved = True
+            st.session_state.show_profile_form = False
             st.success("Profile saved! You can now use all AI tools.")
             st.rerun()
+
     st.markdown('</div>', unsafe_allow_html=True)
 
 # -----------------------------
@@ -475,7 +495,7 @@ st.markdown('<hr class="glow-divider">', unsafe_allow_html=True)
 st.markdown('<div class="section-title">🛠️ Career Tools</div>', unsafe_allow_html=True)
 
 if not st.session_state.profile_saved:
-    st.info("👆 Please set up your profile first to use the AI career tools.")
+    st.info("Please set up your profile first to use the AI career tools.")
 else:
     profile_data = {
         "education": st.session_state.profile_education,
@@ -487,36 +507,36 @@ else:
     col1, col2 = st.columns(2, gap="medium")
 
     with col1:
-        if st.button("📄  Improve Resume", use_container_width=True):
+        if st.button("Improve Resume", use_container_width=True):
             with st.spinner("Analyzing your resume profile..."):
                 result = generate_resume_help(profile_data)
             st.markdown('<div class="result-box">', unsafe_allow_html=True)
-            st.subheader("📄 Resume Improvement")
+            st.subheader("Resume Improvement")
             st.write(result)
             st.markdown('</div>', unsafe_allow_html=True)
 
     with col2:
-        if st.button("📊  Skill Gap Analysis", use_container_width=True):
+        if st.button("Skill Gap Analysis", use_container_width=True):
             with st.spinner("Analyzing your skill gap..."):
                 result = analyze_skill_gap(profile_data)
             st.markdown('<div class="result-box">', unsafe_allow_html=True)
-            st.subheader("📊 Skill Gap Analysis")
+            st.subheader("Skill Gap Analysis")
             st.write(result)
             st.markdown('</div>', unsafe_allow_html=True)
 
     col3, col4 = st.columns(2, gap="medium")
 
     with col3:
-        if st.button("🗺️  Learning Roadmap", use_container_width=True):
+        if st.button("Learning Roadmap", use_container_width=True):
             with st.spinner("Creating your learning roadmap..."):
                 result = generate_roadmap(profile_data)
             st.markdown('<div class="result-box">', unsafe_allow_html=True)
-            st.subheader("🗺️ Learning Roadmap")
+            st.subheader("Learning Roadmap")
             st.write(result)
             st.markdown('</div>', unsafe_allow_html=True)
 
     with col4:
-        if st.button("🎤  Mock Interview", use_container_width=True):
+        if st.button("Mock Interview", use_container_width=True):
             from interview import create_interview_chat
             with st.spinner("Starting your mock interview..."):
                 st.session_state.interview_chat = create_interview_chat(profile_data)
@@ -566,7 +586,7 @@ st.markdown('<hr class="glow-divider">', unsafe_allow_html=True)
 st.markdown('<div class="section-title">💬 Ask CareerPilot</div>', unsafe_allow_html=True)
 
 if not st.session_state.profile_saved:
-    st.info("👆 Please set up your profile first to ask CareerPilot questions.")
+    st.info("Please set up your profile first to ask CareerPilot questions.")
 else:
     question = st.text_area(
         "question",
@@ -576,7 +596,7 @@ else:
     )
 
     st.markdown('<div class="ask-btn">', unsafe_allow_html=True)
-    if st.button("🚀  Ask CareerPilot", use_container_width=True):
+    if st.button("Ask CareerPilot", use_container_width=True):
         if not question.strip():
             st.warning("Please enter a question first.")
         else:
@@ -590,7 +610,7 @@ else:
                     st.session_state.profile_experience
                 )
             st.markdown('<div class="result-box">', unsafe_allow_html=True)
-            st.subheader("💬 CareerPilot")
+            st.subheader("CareerPilot")
             st.write(answer)
             st.markdown('</div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)

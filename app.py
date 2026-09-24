@@ -17,8 +17,6 @@ st.set_page_config(
 # SESSION STATE PROFILE
 # -----------------------------
 
-# Initialize profile in session state
-# This means each user gets their own profile for their session
 if "profile_education" not in st.session_state:
     st.session_state.profile_education = ""
 if "profile_career_goal" not in st.session_state:
@@ -390,7 +388,6 @@ st.markdown("""
 
 st.markdown('<div class="section-title">👤 My Profile</div>', unsafe_allow_html=True)
 
-# Show profile card if saved, else show empty state
 if st.session_state.profile_saved:
     profile_html = (
         '<div class="profile-card">'
@@ -430,9 +427,9 @@ else:
     </div>
     """, unsafe_allow_html=True)
 
-# Edit Profile expander
+# Edit Profile expander — no emojis in label to avoid rendering issues
 with st.expander(
-    "✏️ Edit Profile" if st.session_state.profile_saved else "➕ Set Up Your Profile",
+    "Edit Profile" if st.session_state.profile_saved else "Set Up Your Profile",
     expanded=not st.session_state.profile_saved
 ):
     edu = st.text_input(
@@ -457,7 +454,7 @@ with st.expander(
     )
 
     st.markdown('<div class="save-btn">', unsafe_allow_html=True)
-    if st.button("💾  Save Profile", use_container_width=True):
+    if st.button("Save Profile", use_container_width=True):
         if not edu or not goal or not skills or not exp:
             st.warning("Please fill in all fields before saving.")
         else:
@@ -477,11 +474,9 @@ with st.expander(
 st.markdown('<hr class="glow-divider">', unsafe_allow_html=True)
 st.markdown('<div class="section-title">🛠️ Career Tools</div>', unsafe_allow_html=True)
 
-# Block tools if profile not saved
 if not st.session_state.profile_saved:
     st.info("👆 Please set up your profile first to use the AI career tools.")
 else:
-    # Build profile dict for AI functions
     profile_data = {
         "education": st.session_state.profile_education,
         "career_goal": st.session_state.profile_career_goal,
@@ -606,7 +601,7 @@ else:
 
 st.markdown("""
 <div class="footer">
-    <div class="made-with">Built  using Python &nbsp;·&nbsp; Streamlit &nbsp;·&nbsp; Gemini API</div>
+    <div class="made-with">Built with ❤️ using Python &nbsp;·&nbsp; Streamlit &nbsp;·&nbsp; Gemini API</div>
     <div><span class="highlight">🚀 CareerPilot</span> &nbsp;·&nbsp; AI Career Assistant for Students &amp; Freshers</div>
 </div>
 """, unsafe_allow_html=True)

@@ -1,7 +1,6 @@
 import os
 from google import genai
 from dotenv import load_dotenv
-from profile import get_profile
 
 # Load environment variables
 load_dotenv()
@@ -12,10 +11,26 @@ api_key = os.getenv("GEMINI_API_KEY")
 # Create Gemini client
 client = genai.Client(api_key=api_key)
 
+def analyze_skill_gap(profile_data=None):
 
-def analyze_skill_gap():
-    # Get the user's profile
-    profile = get_profile()
+    # If called from Streamlit, use profile_data from session state
+    # If called from main.py CLI, use profile.json
+    if profile_data is None:
+        from profile import get_profile
+        p = get_profile()
+        profile_data = {
+            "education": p.education,
+            "career_goal": p.career_goal,
+            "skills": p.skills,
+            "experience": p.experience
+        }
+
+    # Handle skills as either a list or comma-separated string
+    skills = profile_data["skills"]
+    if isinstance(skills, list):
+        skills_str = ", ".join(skills)
+    else:
+        skills_str = skills
 
     # Create prompt
     prompt = f"""
@@ -24,34 +39,10 @@ You are CareerPilot, a career skill gap analyzer for students and freshers.
 Analyze the user's current skills based on their career goal.
 
 User Profile:
-Name: {profile.name}
-Education: {profile.education}
-Current Skills: {", ".join(profile.skills)}
-Career Goal: {profile.career_goal}
-Experience: {profile.experience}
-
-Provide the analysis in this format:
-
-SKILL GAP ANALYSIS
-
-Current Skills:
-- List the user's existing skills
-
-Skills to Learn Next:
-
-1. Skill name
-   Why: Short explanation
-   Next Step: What the beginner should do
-
-2. Skill name
-   Why: Short explanation
-   Next Step: What the beginner should do
-
-3. Skill name
-   Why: Short explanation
-   Next Step: What the beginner should do
-
-Provide the analysis in this format:
+Education: {profile_data['education']}
+Current Skills: {skills_str}
+Career Goal: {profile_data['career_goal']}
+Experience: {profile_data['experience']}
 
 📊 SKILL GAP ANALYSIS
 

@@ -1,7 +1,6 @@
 import os
 from dotenv import load_dotenv
 from google import genai
-from profile import get_profile, load_profile
 
 load_dotenv()
 
@@ -12,19 +11,10 @@ if not api_key:
 
 client = genai.Client(api_key=api_key)
 
-load_profile()
+def ask_careerpilot(question, education="", career_goal="", skills="", experience=""):
 
-def create_instructions():
-    profile = get_profile()
-    profile_context = f"""
-User Profile:
-Name: {profile.name}
-Education: {profile.education}
-Skills: {", ".join(profile.skills)}
-Career Goal: {profile.career_goal}
-Experience: {profile.experience}
-"""
-    return f"""
+    # Build profile context from session state values
+    instructions = f"""
 You are CareerPilot, an AI career assistant.
 
 Your job is to help students and freshers with:
@@ -46,22 +36,20 @@ Important rules:
 6. If the user's goal is unclear, ask a clarifying question.
 7. Prefer actionable steps, realistic timelines, and concrete examples.
 
-Here is the user's current profile:
-{profile_context}
+User Profile:
+Education: {education}
+Skills: {skills}
+Career Goal: {career_goal}
+Experience: {experience}
 
 Use this profile to personalize your answers.
 Do not invent information that is not present in the profile.
 """
 
-def create_chat():
-    return client.chats.create(
+    # Send question with profile context
+    response = client.models.generate_content(
         model="gemini-3.5-flash",
-        config={"system_instruction": create_instructions()}
+        contents=f"{instructions}\n\nUser question: {question}"
     )
 
-# Single shared chat session
-_chat = create_chat()
-
-def ask_careerpilot(question):
-    response = _chat.send_message(question)
     return response.text
